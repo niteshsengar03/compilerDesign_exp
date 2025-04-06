@@ -32,7 +32,8 @@ void analyzeTokens(const char *input){
 
     while(input[i] != '\0'){
         if(isalnum(input[i]) || input[i] == '_'){
-            buffer[j++] = input[i];
+            buffer[j] = input[i];
+            j=j+1;
         } else{
             if(j>0){
                 buffer[j]='\0';
