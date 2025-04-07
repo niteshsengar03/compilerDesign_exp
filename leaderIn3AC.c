@@ -1,50 +1,53 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX 100
+// Global TAC array
+char tac[100][100];
 
-int isJump(const char *line) {
-    return strstr(line, "GOTO") || strstr(line, "goto") || strstr(line, "IF") || strstr(line, "if");
+// Function to check if instruction is a jump
+int isJump(int idx) {
+    return strstr(tac[idx], "GOTO") || strstr(tac[idx], "goto") ||
+           strstr(tac[idx], "IF") || strstr(tac[idx], "if");
 }
 
-// Extract target line number from jump statements like "if a < b goto 4" or "goto 6"
-int extractTarget(const char *line) {
+// Extract jump target from line using sscanf
+int extractTarget(int idx) {
     int num;
-    if (sscanf(line, "%*[^0-9]%d", &num) == 1)
-        return num - 1;  // Convert to 0-based index
+    if (sscanf(tac[idx], "%*[^0-9]%d", &num) == 1)
+        return num - 1;
     return -1;
 }
 
 int main() {
     // Hardcoded TAC instructions
-    char tac[MAX][MAX] = {
-        "a = b + c",            // Line 1
-        "if a < b goto 4",      // Line 2
-        "d = a + b",            // Line 3
-        "e = d + 1",            // Line 4
-        "goto 6",               // Line 5
-        "f = e + a"             // Line 6
-    };
-    int n = 6;
-    int leader[MAX] = {0};
+    strcpy(tac[0], "a = b + c");          // Line 1
+    strcpy(tac[1], "if a < b goto 4");    // Line 2
+    strcpy(tac[2], "d = a + b");          // Line 3
+    strcpy(tac[3], "e = d + 1");          // Line 4
+    strcpy(tac[4], "goto 7");             // Line 5
+    strcpy(tac[5], "f = e + a");          // Line 6
+    strcpy(tac[6],"a = b + c");           // line 7 
+    strcpy(tac[7],"a = b + c");           // line 8
 
-    // Rule 1: First instruction is a leader
+
+    int n = 8;
+    int leader[100] = {0};
+
+    // Rule 1: first line is always a leader
     leader[0] = 1;
 
     for (int i = 0; i < n; i++) {
-        if (isJump(tac[i])) {
-            // Rule 2: Mark the jump target as a leader
-            int target = extractTarget(tac[i]);
+        if (isJump(i)) {
+            int target = extractTarget(i);
             if (target >= 0 && target < n)
                 leader[target] = 1;
 
-            // Rule 3: Mark the instruction following the jump as a leader
             if (i + 1 < n)
                 leader[i + 1] = 1;
         }
     }
 
-    // Print leaders
+    // Print leader instructions
     printf("\nLeader Instructions:\n");
     for (int i = 0; i < n; i++) {
         if (leader[i])
